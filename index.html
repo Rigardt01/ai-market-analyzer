@@ -45,7 +45,8 @@ async function analyze(symbol, elementId){
   const macd  = await fetchData(`https://api.twelvedata.com/macd?symbol=${symbol}&interval=${interval}&series_type=close&apikey=${apiKey}`);
   const atr = await fetchData(`https://api.twelvedata.com/atr?symbol=${symbol}&interval=${interval}&time_period=14&apikey=${apiKey}`);
 
-  if(!price.values || !ema.values || !rsi.values || !macd.values){
+  if(!price.values || !ema.values || !rsi.values || !macd.values){ || !atr.values
+
     document.getElementById(elementId).innerHTML = "API limit reached";
     return;
   }
