@@ -56,6 +56,7 @@ async function analyze(symbol, elementId){
   const rsiVal = parseFloat(rsi.values[0].rsi);
   const macdVal = parseFloat(macd.values[0].macd);
   const macdSignal = parseFloat(macd.values[0].macd_signal);
+  const atrVal = parseFloat(atr.values[0].atr);
 
   let score = 0;
 
