@@ -66,6 +66,8 @@ async function analyze(symbol, elementId){
 
   let signal = "WAIT";
   let className = "wait";
+  let sl = "-";
+  let tp = "-";
 
   if(score >= 80){ signal = "STRONG BUY"; className="buy"; }
   else if(score >= 60){ signal = "BUY"; className="buy"; }
