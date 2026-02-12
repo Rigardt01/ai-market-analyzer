@@ -69,10 +69,34 @@ async function analyze(symbol, elementId){
   let sl = "-";
   let tp = "-";
 
-  if(score >= 80){ signal = "STRONG BUY"; className="buy"; }
-  else if(score >= 60){ signal = "BUY"; className="buy"; }
-  else if(score <= 30){ signal = "STRONG SELL"; className="sell"; }
-  else if(score <= 50){ signal = "SELL"; className="sell"; }
+  if(score >= 80){ 
+  signal = "STRONG BUY"; 
+  className="buy";
+  sl = (close - atrVal).toFixed(2);
+  tp = (close + (atrVal * 2)).toFixed(2);
+}
+else if(score >= 60){ 
+  signal = "BUY"; 
+  className="buy";
+  sl = (close - atrVal).toFixed(2);
+  tp = (close + (atrVal * 2)).toFixed(2);
+}
+else if(score <= 30){ 
+  signal = "STRONG SELL"; 
+  className="sell";
+  sl = (close + atrVal).toFixed(2);
+  tp = (close - (atrVal * 2)).toFixed(2);
+}
+else if(score <= 50){ 
+  signal = "SELL"; 
+  className="sell";
+  sl = (close + atrVal).toFixed(2);
+  tp = (close - (atrVal * 2)).toFixed(2);
+}
+
+  
+  
+  
 
   document.getElementById(elementId).innerHTML =
     `<h2>${symbol}</h2>
