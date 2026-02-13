@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,7 +19,7 @@
 
 <script>
 
-const apiKey = ab9b1755372a4fa8a1855ddd39bb2030
+const apiKey = ab9b1755372a4fa8a1855ddd39bb2030;
 
 async function fetchData(url){
   const response = await fetch(url);
@@ -35,9 +34,8 @@ async function analyze(symbol, elementId){
   const ema   = await fetchData(`https://api.twelvedata.com/ema?symbol=${symbol}&interval=${interval}&time_period=200&series_type=close&apikey=${apiKey}`);
   const rsi   = await fetchData(`https://api.twelvedata.com/rsi?symbol=${symbol}&interval=${interval}&time_period=14&series_type=close&apikey=${apiKey}`);
   const macd  = await fetchData(`https://api.twelvedata.com/macd?symbol=${symbol}&interval=${interval}&series_type=close&apikey=${apiKey}`);
-  const atr   = await fetchData(`https://api.twelvedata.com/atr?symbol=${symbol}&interval=${interval}&time_period=14&apikey=${apiKey}`);
 
-  if(!price.values || !ema.values || !rsi.values || !macd.values || !atr.values){
+  if(!price.values || !ema.values || !rsi.values || !macd.values){
     document.getElementById(elementId).innerHTML = "API limit reached";
     return;
   }
@@ -47,7 +45,6 @@ async function analyze(symbol, elementId){
   const rsiVal = parseFloat(rsi.values[0].rsi);
   const macdVal = parseFloat(macd.values[0].macd);
   const macdSignal = parseFloat(macd.values[0].macd_signal);
-  const atrVal = parseFloat(atr.values[0].atr);
 
   let score = 0;
 
@@ -57,40 +54,16 @@ async function analyze(symbol, elementId){
 
   let signal = "WAIT";
   let className = "wait";
-  let sl = "-";
-  let tp = "-";
 
-  if(score >= 80){ 
-    signal = "STRONG BUY"; 
-    className="buy";
-    sl = (close - atrVal).toFixed(2);
-    tp = (close + (atrVal * 2)).toFixed(2);
-  }
-  else if(score >= 60){ 
-    signal = "BUY"; 
-    className="buy";
-    sl = (close - atrVal).toFixed(2);
-    tp = (close + (atrVal * 2)).toFixed(2);
-  }
-  else if(score <= 30){ 
-    signal = "STRONG SELL"; 
-    className="sell";
-    sl = (close + atrVal).toFixed(2);
-    tp = (close - (atrVal * 2)).toFixed(2);
-  }
-  else if(score <= 50){ 
-    signal = "SELL"; 
-    className="sell";
-    sl = (close + atrVal).toFixed(2);
-    tp = (close - (atrVal * 2)).toFixed(2);
-  }
+  if(score >= 80){ signal = "STRONG BUY"; className="buy"; }
+  else if(score >= 60){ signal = "BUY"; className="buy"; }
+  else if(score <= 30){ signal = "STRONG SELL"; className="sell"; }
+  else if(score <= 50){ signal = "SELL"; className="sell"; }
 
   document.getElementById(elementId).innerHTML =
     `<h2>${symbol}</h2>
      <p class="${className}">${signal}</p>
-     <p>Confidence: ${score}%</p>
-     <p>SL: ${sl}</p>
-     <p>TP: ${tp}</p>`;
+     <p>Confidence: ${score}%</p>`;
 }
 
 function update(){
@@ -105,3 +78,4 @@ setInterval(update, 60000);
 
 </body>
 </html>
+
