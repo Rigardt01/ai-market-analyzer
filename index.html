@@ -14,8 +14,8 @@
 
 <h1>AI Market Analyzer</h1>
 
-<div class="card" id="XAUUSD"></div>
-<div class="card" id="EURUSD"></div>
+<div class="card" id="XAUUSD">Loading...</div>
+<div class="card" id="EURUSD">Loading...</div>
 
 <script>
 
@@ -35,7 +35,7 @@ async function analyze(symbol, elementId){
   const atr   = await fetchData(`https://api.twelvedata.com/atr?symbol=${symbol}&interval=${interval}&time_period=14&apikey=${apiKey}`);
 
   if(!price.values || !rsi.values || !atr.values){
-    document.getElementById(elementId).innerHTML = "API limit reached";
+    document.getElementById(elementId).innerHTML = "API limit reached or invalid key";
     return;
   }
 
@@ -45,28 +45,26 @@ async function analyze(symbol, elementId){
 
   const entry = close;
 
-  let score = 0;
-
-  if(close > emaVal) score += 40;
-  if(rsiVal > 50) score += 30;
-  if(macdVal > macdSignal) score += 30;
-
   let signal = "WAIT";
   let className = "wait";
 
-  if(score >= 80){ signal = "STRONG BUY"; className="buy"; }
-  else if(score >= 60){ signal = "BUY"; className="buy"; }
-  else if(score <= 30){ signal = "STRONG SELL"; className="sell"; }
-  else if(score <= 50){ signal = "SELL"; className="sell"; }
+  if(rsiVal > 55){
+    signal = "BUY";
+    className = "buy";
+  }
+  else if(rsiVal < 45){
+    signal = "SELL";
+    className = "sell";
+  }
 
   let stopLoss = "-";
   let takeProfit = "-";
 
-  if(signal.includes("BUY")){
+  if(signal === "BUY"){
     stopLoss = entry - (atrVal * 1.5);
     takeProfit = entry + (atrVal * 3);
   }
-  else if(signal.includes("SELL")){
+  else if(signal === "SELL"){
     stopLoss = entry + (atrVal * 1.5);
     takeProfit = entry - (atrVal * 3);
   }
@@ -74,7 +72,7 @@ async function analyze(symbol, elementId){
   document.getElementById(elementId).innerHTML =
     `<h2>${symbol}</h2>
      <p class="${className}">${signal}</p>
-     <p>Confidence: ${score}%</p>
+     <p>RSI: ${rsiVal.toFixed(2)}</p>
      <p>Entry: ${entry.toFixed(5)}</p>
      <p>Stop Loss: ${stopLoss !== "-" ? stopLoss.toFixed(5) : "-"}</p>
      <p>Take Profit: ${takeProfit !== "-" ? takeProfit.toFixed(5) : "-"}</p>`;
@@ -92,6 +90,8 @@ setInterval(update, 300000);
 
 </body>
 </html>
+
+
 
 
 
