@@ -31,21 +31,16 @@ async function analyze(symbol, elementId){
   const interval = "1h";
 
   const price = await fetchData(`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=${interval}&outputsize=1&apikey=${apiKey}`);
-  const ema   = await fetchData(`https://api.twelvedata.com/ema?symbol=${symbol}&interval=${interval}&time_period=200&series_type=close&apikey=${apiKey}`);
   const rsi   = await fetchData(`https://api.twelvedata.com/rsi?symbol=${symbol}&interval=${interval}&time_period=14&series_type=close&apikey=${apiKey}`);
-  const macd  = await fetchData(`https://api.twelvedata.com/macd?symbol=${symbol}&interval=${interval}&series_type=close&apikey=${apiKey}`);
   const atr   = await fetchData(`https://api.twelvedata.com/atr?symbol=${symbol}&interval=${interval}&time_period=14&apikey=${apiKey}`);
 
-  if(!price.values || !ema.values || !rsi.values || !macd.values || !atr.values){
+  if(!price.values || !rsi.values || !atr.values){
     document.getElementById(elementId).innerHTML = "API limit reached";
     return;
   }
 
   const close = parseFloat(price.values[0].close);
-  const emaVal = parseFloat(ema.values[0].ema);
   const rsiVal = parseFloat(rsi.values[0].rsi);
-  const macdVal = parseFloat(macd.values[0].macd);
-  const macdSignal = parseFloat(macd.values[0].macd_signal);
   const atrVal = parseFloat(atr.values[0].atr);
 
   const entry = close;
