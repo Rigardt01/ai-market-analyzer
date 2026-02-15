@@ -34,8 +34,9 @@ async function analyze(symbol, elementId){
   const ema   = await fetchData(`https://api.twelvedata.com/ema?symbol=${symbol}&interval=${interval}&time_period=200&series_type=close&apikey=${apiKey}`);
   const rsi   = await fetchData(`https://api.twelvedata.com/rsi?symbol=${symbol}&interval=${interval}&time_period=14&series_type=close&apikey=${apiKey}`);
   const macd  = await fetchData(`https://api.twelvedata.com/macd?symbol=${symbol}&interval=${interval}&series_type=close&apikey=${apiKey}`);
+  const atr   = await fetchData(`https://api.twelvedata.com/atr?symbol=${symbol}&interval=${interval}&time_period=14&apikey=${apiKey}`);
 
-  if(!price.values || !ema.values || !rsi.values || !macd.values){
+  if(!price.values || !ema.values || !rsi.values || !macd.values || !atr.values){
     document.getElementById(elementId).innerHTML = "API limit reached";
     return;
   }
@@ -45,6 +46,9 @@ async function analyze(symbol, elementId){
   const rsiVal = parseFloat(rsi.values[0].rsi);
   const macdVal = parseFloat(macd.values[0].macd);
   const macdSignal = parseFloat(macd.values[0].macd_signal);
+  const atrVal = parseFloat(atr.values[0].atr);
+
+  const entry = close;
 
   let score = 0;
 
@@ -60,10 +64,25 @@ async function analyze(symbol, elementId){
   else if(score <= 30){ signal = "STRONG SELL"; className="sell"; }
   else if(score <= 50){ signal = "SELL"; className="sell"; }
 
+  let stopLoss = "-";
+  let takeProfit = "-";
+
+  if(signal.includes("BUY")){
+    stopLoss = entry - (atrVal * 1.5);
+    takeProfit = entry + (atrVal * 3);
+  }
+  else if(signal.includes("SELL")){
+    stopLoss = entry + (atrVal * 1.5);
+    takeProfit = entry - (atrVal * 3);
+  }
+
   document.getElementById(elementId).innerHTML =
     `<h2>${symbol}</h2>
      <p class="${className}">${signal}</p>
-     <p>Confidence: ${score}%</p>`;
+     <p>Confidence: ${score}%</p>
+     <p>Entry: ${entry.toFixed(5)}</p>
+     <p>Stop Loss: ${stopLoss !== "-" ? stopLoss.toFixed(5) : "-"}</p>
+     <p>Take Profit: ${takeProfit !== "-" ? takeProfit.toFixed(5) : "-"}</p>`;
 }
 
 function update(){
@@ -78,4 +97,6 @@ setInterval(update, 60000);
 
 </body>
 </html>
+
+
 
