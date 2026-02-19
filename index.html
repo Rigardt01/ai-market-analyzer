@@ -1,39 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Market Analyzer (M15)</title>
+    <title>Gold Analyzer (M15)</title>
     <style>
         body { font-family: Arial; background:#111; color:white; text-align:center; }
-        .card { background:#222; padding:20px; margin:20px; border-radius:10px; }
-        .buy { color:lime; }
-        .sell { color:red; }
+        .card { background:#222; padding:20px; margin:40px auto; border-radius:10px; width:300px; }
+        .buy { color:lime; font-size:22px; }
+        .sell { color:red; font-size:22px; }
     </style>
 </head>
 <body>
 
-<h1>AI Market Analyzer (15 Minute)</h1>
+<h1>Gold AI Analyzer (15 Minute)</h1>
 
 <div class="card" id="XAUUSD">Loading...</div>
-<div class="card" id="NASDAQ">Loading...</div>
 
 <script>
 
 const apiKey = "457d408780544d6c90e1276bb2ed8259";
+
+let lastSignal = ""; // Stores previous signal
 
 async function fetchData(url){
   const response = await fetch(url);
   return await response.json();
 }
 
-async function analyze(symbol, elementId){
+async function analyze(){
 
   const interval = "15min";
 
-  const price = await fetchData(`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=${interval}&outputsize=2&apikey=${apiKey}`);
-  const atr   = await fetchData(`https://api.twelvedata.com/atr?symbol=${symbol}&interval=${interval}&time_period=14&apikey=${apiKey}`);
+  const price = await fetchData(`https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=${interval}&outputsize=2&apikey=${apiKey}`);
+  const atr   = await fetchData(`https://api.twelvedata.com/atr?symbol=XAU/USD&interval=${interval}&time_period=14&apikey=${apiKey}`);
 
   if(!price.values || !atr.values){
-    document.getElementById(elementId).innerHTML = "API limit reached or invalid key";
+    document.getElementById("XAUUSD").innerHTML = "API limit reached";
     return;
   }
 
@@ -64,29 +65,29 @@ async function analyze(symbol, elementId){
     takeProfit = entry - (atrVal * 2);
   }
 
-  document.getElementById(elementId).innerHTML =
-    `<h2>${symbol}</h2>
+  // 🔊 PRO SOUND ALERT (only if signal changes)
+  if(signal !== lastSignal){
+    new Audio("https://www.soundjay.com/buttons/sounds/button-3.mp3").play();
+    lastSignal = signal;
+  }
+
+  document.getElementById("XAUUSD").innerHTML =
+    `<h2>XAU/USD</h2>
      <p class="${className}">${signal}</p>
      <p>Entry: ${entry.toFixed(2)}</p>
      <p>Stop Loss: ${stopLoss.toFixed(2)}</p>
      <p>Take Profit: ${takeProfit.toFixed(2)}</p>`;
+
 }
 
-function update(){
-  analyze("NDX","NASDAQ");
-
-  setTimeout(() => {
-    analyze("XAU/USD","XAUUSD");
-  }, 4000);
-}
-
-update();
-setInterval(update, 300000);
+analyze();
+setInterval(analyze, 300000);
 
 </script>
 
 </body>
 </html>
+
 
 
 
