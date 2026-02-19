@@ -1,25 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Market Analyzer</title>
+    <title>AI Market Analyzer (M15)</title>
     <style>
         body { font-family: Arial; background:#111; color:white; text-align:center; }
         .card { background:#222; padding:20px; margin:20px; border-radius:10px; }
         .buy { color:lime; }
         .sell { color:red; }
-        .wait { color:orange; }
     </style>
 </head>
 <body>
 
-<h1>AI Market Analyzer</h1>
+<h1>AI Market Analyzer (15 Minute)</h1>
 
 <div class="card" id="XAUUSD">Loading...</div>
-<div class="card" id="EURUSD">Loading...</div>
+<div class="card" id="NASDAQ">Loading...</div>
 
 <script>
 
-const apiKey = "457d408780544d6c90e1276bb2ed8259";
+const apiKey = "PASTE_YOUR_REAL_API_KEY_HERE";
 
 async function fetchData(url){
   const response = await fetch(url);
@@ -28,59 +27,39 @@ async function fetchData(url){
 
 async function analyze(symbol, elementId){
 
-  const interval = "1h";
+  const interval = "15min";
 
-  const price = await fetchData(`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=${interval}&outputsize=1&apikey=${apiKey}`);
-  const rsi   = await fetchData(`https://api.twelvedata.com/rsi?symbol=${symbol}&interval=${interval}&time_period=14&series_type=close&apikey=${apiKey}`);
-  const atr   = await fetchData(`https://api.twelvedata.com/atr?symbol=${symbol}&interval=${interval}&time_period=14&apikey=${apiKey}`);
+  const price = await fetchData(`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=${interval}&outputsize=2&apikey=${apiKey}`);
 
-  if(!price.values || !rsi.values || !atr.values){
-    document.getElementById(elementId).innerHTML = "API limit reached or invalid key";
+  if(!price.values){
+    document.getElementById(elementId).innerHTML = "API limit reached";
     return;
   }
 
-  const close = parseFloat(price.values[0].close);
-  const rsiVal = parseFloat(rsi.values[0].rsi);
-  const atrVal = parseFloat(atr.values[0].atr);
+  const currentClose = parseFloat(price.values[0].close);
+  const previousClose = parseFloat(price.values[1].close);
 
-  const entry = close;
+  let signal = "";
+  let className = "";
 
-  let signal = "WAIT";
-  let className = "wait";
-
-  if(rsiVal > 55){
+  if(currentClose > previousClose){
     signal = "BUY";
     className = "buy";
-  }
-  else if(rsiVal < 45){
+  } else {
     signal = "SELL";
     className = "sell";
-  }
-
-  let stopLoss = "-";
-  let takeProfit = "-";
-
-  if(signal === "BUY"){
-    stopLoss = entry - (atrVal * 1.5);
-    takeProfit = entry + (atrVal * 3);
-  }
-  else if(signal === "SELL"){
-    stopLoss = entry + (atrVal * 1.5);
-    takeProfit = entry - (atrVal * 3);
   }
 
   document.getElementById(elementId).innerHTML =
     `<h2>${symbol}</h2>
      <p class="${className}">${signal}</p>
-     <p>RSI: ${rsiVal.toFixed(2)}</p>
-     <p>Entry: ${entry.toFixed(5)}</p>
-     <p>Stop Loss: ${stopLoss !== "-" ? stopLoss.toFixed(5) : "-"}</p>
-     <p>Take Profit: ${takeProfit !== "-" ? takeProfit.toFixed(5) : "-"}</p>`;
+     <p>Current: ${currentClose.toFixed(2)}</p>
+     <p>Previous: ${previousClose.toFixed(2)}</p>`;
 }
 
 function update(){
   analyze("XAU/USD","XAUUSD");
-  analyze("EUR/USD","EURUSD");
+  analyze("NDX","NASDAQ");
 }
 
 update();
@@ -90,6 +69,8 @@ setInterval(update, 300000);
 
 </body>
 </html>
+
+
 
 
 
