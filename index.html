@@ -73,8 +73,11 @@ async function analyze(symbol, elementId){
 }
 
 function update(){
-  analyze("XAU/USD","XAUUSD");
   analyze("NDX","NASDAQ");
+
+  setTimeout(() => {
+    analyze("XAU/USD","XAUUSD");
+  }, 2000);
 }
 
 update();
